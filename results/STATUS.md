@@ -13,3 +13,6 @@
 - Native HTTPS Git proxy push succeeded; branch project/explainable-ser exists remotely.
 - PR creation attempted with gh: API GraphQL request returned Forbidden. There is no callable GitHub app connector in this session. This API failure does not establish that native Git authentication is missing.
 - Runtime network still reports no custom allowed hosts; draft now requests zenodo.org and api.github.com. Apply through environment settings before retrying.
+
+- GitHub branch source ZIP downloaded successfully (26,653 bytes), archive integrity checked, source and measured pytest output confirmed inside. Permanent download: https://github.com/therealvik3939-cloud/speech-emotion-recognition/archive/refs/heads/project/explainable-ser.zip
+- Dependency integrity: pip check reports no broken requirements.
