@@ -1,4 +1,4 @@
-......                                                                   [100%]
+..........                                                               [100%]
 =============================== warnings summary ===============================
 tests/test_core.py::test_inference
   /workspace/ser-venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:64: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'
@@ -27,4 +27,4 @@ tests/test_core.py::test_inference
     ParserElement.enablePackrat()
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-6 passed, 14 warnings in 4.63s
+10 passed, 14 warnings in 4.26s

@@ -7,3 +7,9 @@
 - Trained bundle: does not exist; packaging/release/retrieval unverified.
 - GitHub CLI authentication: failed. Native Git proxy publishing is tested separately.
 - Windows installation: unverified.
+
+## Follow-up validation
+- Expanded local pytest run: **10 passed in 4.26 seconds**, 14 third-party deprecation warnings. Full output: pytest.txt.
+- Native HTTPS Git proxy push succeeded; branch project/explainable-ser exists remotely.
+- PR creation attempted with gh: API GraphQL request returned Forbidden. There is no callable GitHub app connector in this session. This API failure does not establish that native Git authentication is missing.
+- Runtime network still reports no custom allowed hosts; draft now requests zenodo.org and api.github.com. Apply through environment settings before retrying.

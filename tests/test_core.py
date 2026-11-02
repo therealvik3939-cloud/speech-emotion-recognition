@@ -59,3 +59,46 @@ def test_app_smoke(monkeypatch):
     monkeypatch.setenv("SER_MODEL","/nonexistent/model.joblib")
     app=AppTest.from_file("app.py").run()
     assert not app.exception and len(app.warning)==1
+
+def test_grouped_cv_and_fold_scaling():
+    from sklearn.model_selection import StratifiedGroupKFold
+    from sklearn.pipeline import Pipeline
+    from sklearn.linear_model import LogisticRegression
+    groups=np.repeat(np.arange(1,17),8)
+    labels=np.tile(np.arange(8),16)
+    X=np.column_stack([groups*100.,labels])
+    cv=StratifiedGroupKFold(n_splits=4,shuffle=True,random_state=42)
+    for train,held in cv.split(X,labels,groups):
+        assert not set(groups[train]) & set(groups[held])
+        assert set(groups[train]) <= set(SPLITS['train'])
+        pipe=Pipeline([('scale',StandardScaler()),('clf',__import__('sklearn.dummy',fromlist=['DummyClassifier']).DummyClassifier())])
+        pipe.fit(X[train],labels[train])
+        np.testing.assert_allclose(pipe['scale'].mean_,X[train].mean(axis=0))
+        before=pipe['scale'].mean_.copy(); pipe.predict(X[held]+10000)
+        np.testing.assert_array_equal(before,pipe['scale'].mean_)
+
+def test_metrics_include_all_classes():
+    m=metrics(LABELS,LABELS)
+    assert m['macro_f1']==1 and m['balanced_accuracy']==1
+    assert np.array_equal(m['confusion_matrix'],np.eye(8))
+    assert m['class_order']==LABELS
+
+def test_resample_and_stereo():
+    t=np.arange(32000)/32000
+    y=np.column_stack([.1*np.sin(2*np.pi*220*t)]*2)
+    b=io.BytesIO(); sf.write(b,y,32000,format='WAV')
+    mono=load_audio(b.getvalue())
+    assert mono.ndim==1 and len(mono)==SR
+    assert np.sqrt(np.mean(mono**2))==pytest.approx(.1/np.sqrt(2),rel=.01)
+
+def test_app_with_synthetic_bundle(tmp_path,monkeypatch):
+    # Tests readiness with a toy model; never distributed as a trained SER model.
+    from sklearn.pipeline import Pipeline
+    from streamlit.testing.v1 import AppTest
+    model=Pipeline([('scale',StandardScaler()),('clf',RandomForestClassifier(n_estimators=2,random_state=42))])
+    model.fit(np.random.default_rng(42).normal(size=(16,35)),LABELS*2)
+    p=tmp_path/'model.joblib'; joblib.dump({'model':model,'explanation_model':model,'feature_names':NAMES},p)
+    p.with_suffix('.joblib.sha256').write_text(hashlib.sha256(p.read_bytes()).hexdigest())
+    monkeypatch.setenv('SER_MODEL',str(p))
+    app=AppTest.from_file('app.py').run()
+    assert not app.exception and not app.warning
